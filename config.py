@@ -25,4 +25,8 @@ log_path = BASE_DIR + '/log/ncov.log'
 util_log = Logger(log_path)
 log = util_log.logger
 
-JWT_SALT = 'iv%x6xo7l7_u9bf_u!9#g#m*)*=ej@bek5)(@u3kh*72+unjv='
+JWT_SALT = 'iv%x6xo7l7_u9bf_u!9#g#m*)*'
+
+JWT_TIMEOUT = 1
+
+MD5_SALT = 'ncoc_python'

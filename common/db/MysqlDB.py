@@ -159,3 +159,14 @@ class DBCreateSql:
             self.conn.rollback()
             print(sql)
             self.log.info("sql execute failed:%s" % str(e))
+
+
+if __name__ == '__main__':
+    db_sql = DBCreateSql()
+    uname = 'admin'
+    user_sql ="""
+    SELECT password FROM sys_user WHERE username = '{}'
+    """.format(uname)
+    # user_sql = "SELECT password FROM sys_user WHERE username = {}".format(uname)
+    res = db_sql.find_all(user_sql)
+    print(res)
