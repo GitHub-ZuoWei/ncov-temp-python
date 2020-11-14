@@ -194,7 +194,6 @@ class CtList(MethodView):
                     name_dict[file[0]] = [file[1]]
             slice_dicts = {k: name_dict[k] for k in list(name_dict.keys())[start:end]}
             total = len(slice_dicts.keys())
-
             for k, v in slice_dicts.items():
                 img_list = list()
                 for i in v:
