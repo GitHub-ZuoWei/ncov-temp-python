@@ -1,3 +1,5 @@
+import re
+
 from flask import Flask, request, Response
 from flask.views import MethodView
 from common.db.MysqlDB import DBCreateSql
@@ -14,6 +16,7 @@ from config import PDFS
 app = Flask(__name__)
 CORS(app)
 pysolr_solr = pysolr.Solr(SOLR_ADDR)
+
 
 class Login(MethodView):
 
@@ -433,11 +436,11 @@ class IndexSearch(MethodView):
         # 判断查询类型   人物详情页接口
         if select_type == 1:
             person_info_data_one = pysolr_solr.search(solr_query, **{'start': (int(page) - 1) * size, 'rows': size,
-                                                                 'fq': '-category:"报告单"',
-                                                                 'sort': 'start_time desc', })
+                                                                     'fq': '-category:"报告单"',
+                                                                     'sort': 'start_time desc', })
             person_info_data_two = pysolr_solr.search(solr_query, **{'start': (int(page) - 1) * size, 'rows': size,
-                                                                 'fq': 'category:"报告单"',
-                                                                 'sort': 'start_time desc', })
+                                                                     'fq': 'category:"报告单"',
+                                                                     'sort': 'start_time desc', })
 
         search_data = pysolr_solr.search(solr_query, **{'start': (int(page) - 1) * size, 'rows': size,
                                                         'sort': 'start_time desc', })
@@ -480,7 +483,7 @@ class IndexSearch(MethodView):
                 if index % 2 == 0:
                     if index == len(category_data) - 1:
                         break
-                    if not category_data[index].isdigit():
+                    if not category_data[index].isdigit() and not re.search("^[a-zA-z]+$", category_data[index]):
                         temp_person_data['name'] = category_data[index]
                         temp_person_data['value'] = category_data[index + 1]
                 if temp_person_data:
@@ -517,8 +520,10 @@ class IndexSearch(MethodView):
             person_info_data_one.raw_response["response"]['sidebarType'] = type_data
             person_info_data_one.raw_response["response"]['sidebarKeywords'] = content_data
             person_info_data_one.raw_response["response"]['sidebarPerson'] = person_data
-            person_info_data_one.raw_response["response"]['docsTwo'] = person_info_data_two.raw_response["response"]["docs"]
+            person_info_data_one.raw_response["response"]['docsTwo'] = person_info_data_two.raw_response["response"][
+                "docs"]
             return return_response(person_info_data_one.raw_response["response"], 200)
+
 
 app.add_url_rule('/user/login', view_func=Login.as_view('login'))
 app.add_url_rule('/test_token', view_func=TestToken.as_view('test_token'))
