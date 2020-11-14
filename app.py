@@ -300,7 +300,7 @@ class UserDetailBaseCtTemp(MethodView):
                 content_type="application/json")
         db_sql = DBCreateSql()
         person_sql = """
-                        SELECT * FROM person_info WHERE person_name = '{}'""".format(
+                        SELECT * FROM person_info WHERE person_name like '%{}%'""".format(
             name)
         db_person_res = db_sql.find_all(person_sql)
         db_person_res = db_person_res[0]
@@ -338,7 +338,7 @@ class UserDetailBaseCtTemp(MethodView):
             tmp_img_list.append(tmp_dict)
 
         file_sql = """
-                                                        SELECT person_name,file_date,file_path FROM file_record WHERE type = 1 AND person_name like %'{}'%
+                                                        SELECT person_name,file_date,file_path FROM file_record WHERE type = 1 AND person_name like '%{}%'
                                                         """.format(name)
 
         db_file_res = db_sql.find_all(file_sql)
@@ -419,7 +419,7 @@ class IndexSearch(MethodView):
             if type == '核酸检测':
                 type = '核酸扩增荧光定量检测报告单'
             if solr_query:
-                solr_query += ' && (category:"' + '报告单' + type + '" || type:"' + type + '")'
+                solr_query += ' && (category:"' + type + '" || type:"' + type + '")'
             else:
                 solr_query += ' (category:"' + type + '" || type:"' + type + '")'
         if start_time and end_time:
