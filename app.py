@@ -338,7 +338,7 @@ class UserDetailBaseCtTemp(MethodView):
             tmp_img_list.append(tmp_dict)
 
         file_sql = """
-                                                        SELECT person_name,file_date,file_path FROM file_record WHERE type = 1 AND person_name = '{}'
+                                                        SELECT person_name,file_date,file_path FROM file_record WHERE type = 1 AND person_name like %'{}'%
                                                         """.format(name)
 
         db_file_res = db_sql.find_all(file_sql)
