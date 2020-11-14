@@ -27,6 +27,9 @@ log = util_log.logger
 
 JWT_SALT = 'iv%x6xo7l7_u9bf_u!9#g#m*)*'
 
-JWT_TIMEOUT = 1
+JWT_TIMEOUT = 5
 
 MD5_SALT = 'ncoc_python'
+
+DOCS_PATH = os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'common'), 'docs')
+
