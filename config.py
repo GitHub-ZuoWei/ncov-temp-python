@@ -33,3 +33,4 @@ MD5_SALT = 'ncoc_python'
 
 DOCS_PATH = os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'common'), 'docs')
 
+PDFS = '/mnt/hgfs/vmshare/ncov_pdfs'
