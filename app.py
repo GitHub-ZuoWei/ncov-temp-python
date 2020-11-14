@@ -288,7 +288,7 @@ class CtDetails(MethodView):
 
 
 class UserDetailBaseCtTemp(MethodView):
-    decorators = [jwt_token_requires]
+    # decorators = [jwt_token_requires]
 
     def post(self):
         data = request.get_data()
@@ -348,9 +348,6 @@ class UserDetailBaseCtTemp(MethodView):
                                                         """.format(name)
 
         db_file_res = db_sql.find_all(file_sql)
-        if not db_file_res:
-            res_dict = {"retcode": 200000, "msg": "success", "data": []}
-            return Response(json.dumps(res_dict, ensure_ascii=False), status=200, content_type='application/json')
 
         res_list = []
         time_dict = {}
