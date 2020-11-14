@@ -15,6 +15,7 @@ app = Flask(__name__)
 CORS(app)
 pysolr_solr = pysolr.Solr(SOLR_ADDR)
 
+
 class Login(MethodView):
 
     def post(self):
@@ -93,19 +94,19 @@ class CtList(MethodView):
         if type == 'ctreport':
             if start_time and end_time and name:
                 file_sql = """
-                            SELECT person_name,file_date,file_path FROM file_record WHERE person_name = '{}' AND type = 1 AND file_date > '{}' AND file_date < '{}'
+                            SELECT person_name,file_date,file_path FROM file_record WHERE person_name like '%{}%' AND type = 1 AND file_date > '{}' AND file_date < '{}' order by person_name,file_date
                             """.format(name, start_time, end_time)
             elif start_time and end_time:
                 file_sql = """
-                                            SELECT person_name,file_date,file_path FROM file_record WHERE type = 1 AND file_date > '{}' AND file_date < '{}'
-                                            """.format(start_time, end_time)
+                            SELECT person_name,file_date,file_path FROM file_record WHERE type = 1 AND file_date > '{}' AND file_date < '{}'
+                                            order by person_name,file_date""".format(start_time, end_time)
             elif name:
                 file_sql = """
-                                                            SELECT person_name,file_date,file_path FROM file_record WHERE type = 1 AND person_name = '{}'
-                                                            """.format(name)
+                            SELECT person_name,file_date,file_path FROM file_record WHERE type = 1 AND person_name like '%{}%'
+                                                            order by person_name,file_date""".format(name)
             else:
                 file_sql = """
-                                        SELECT person_name,file_date,file_path FROM file_record WHERE type = 1 """
+                                        SELECT person_name,file_date,file_path FROM file_record WHERE type = 1 orderby person_name,file_date"""
 
             db_file_res = db_sql.find_all(file_sql)
             if not db_file_res:
@@ -121,17 +122,20 @@ class CtList(MethodView):
 
             start = (page - 1) * page_size
             end = page * page_size
-            data = db_file_res[start:end]
-            # data = db_file_res
+
             res_list = []
             time_dict = {}
-            for file in data:
-                if str(file[1]) in time_dict.keys():
-                    time_dict[str(file[1])].append(file[2])
+            for file in db_file_res:
+                if str(file[1])+'/'+file[0] in time_dict.keys():
+                    time_dict[str(file[1])+'/'+file[0]].append(file[2])
                 else:
-                    time_dict[str(file[1])] = [file[2]]
-            total = len(time_dict.keys())
-            for k, v in time_dict.items():
+                    time_dict[str(file[1])+'/'+file[0]] = [file[2]]
+
+            slice_dicts = { k: time_dict[k] for k in list(time_dict.keys())[start:end]}
+            total = len(slice_dicts)
+            for k, v in slice_dicts.items():
+                k = k.split("/")[0]
+                k = k.split(" ")[0]
                 img_list = list()
                 for i in v:
                     v_list = i.split("/")
@@ -155,7 +159,7 @@ class CtList(MethodView):
         else:
             if name:
                 file_sql = """
-                                                        SELECT person_name,file_path FROM file_record WHERE person_name = '{}' AND type = 2""".format(
+                                                        SELECT person_name,file_path FROM file_record WHERE person_name like '%{}%' AND type = 2""".format(
                     name)
             else:
                 file_sql = """
@@ -176,8 +180,8 @@ class CtList(MethodView):
 
             start = (page - 1) * page_size
             end = page * page_size
-            data = db_file_res[start:end]
-            # data = db_file_res
+            data = db_file_res
+
             res_list = []
             img_list = list()
             name_dict = {}
@@ -186,9 +190,10 @@ class CtList(MethodView):
                     name_dict[file[0]].append(file[1])
                 else:
                     name_dict[file[0]] = [file[1]]
-            total = len(name_dict.keys())
+            slice_dicts = {k: name_dict[k] for k in list(name_dict.keys())[start:end]}
+            total = len(slice_dicts.keys())
 
-            for k, v in name_dict.items():
+            for k, v in slice_dicts.items():
                 img_list = list()
                 for i in v:
                     v_list = i.split("/")
@@ -433,11 +438,11 @@ class IndexSearch(MethodView):
         # 判断查询类型   人物详情页接口
         if select_type == 1:
             person_info_data_one = pysolr_solr.search(solr_query, **{'start': (int(page) - 1) * size, 'rows': size,
-                                                                 'fq': '-category:"报告单"',
-                                                                 'sort': 'start_time desc', })
+                                                                     'fq': '-category:"报告单"',
+                                                                     'sort': 'start_time desc', })
             person_info_data_two = pysolr_solr.search(solr_query, **{'start': (int(page) - 1) * size, 'rows': size,
-                                                                 'fq': 'category:"报告单"',
-                                                                 'sort': 'start_time desc', })
+                                                                     'fq': 'category:"报告单"',
+                                                                     'sort': 'start_time desc', })
 
         search_data = pysolr_solr.search(solr_query, **{'start': (int(page) - 1) * size, 'rows': size,
                                                         'sort': 'start_time desc', })
@@ -517,8 +522,10 @@ class IndexSearch(MethodView):
             person_info_data_one.raw_response["response"]['sidebarType'] = type_data
             person_info_data_one.raw_response["response"]['sidebarKeywords'] = content_data
             person_info_data_one.raw_response["response"]['sidebarPerson'] = person_data
-            person_info_data_one.raw_response["response"]['docsTwo'] = person_info_data_two.raw_response["response"]["docs"]
+            person_info_data_one.raw_response["response"]['docsTwo'] = person_info_data_two.raw_response["response"][
+                "docs"]
             return return_response(person_info_data_one.raw_response["response"], 200)
+
 
 app.add_url_rule('/user/login', view_func=Login.as_view('login'))
 app.add_url_rule('/test_token', view_func=TestToken.as_view('test_token'))
