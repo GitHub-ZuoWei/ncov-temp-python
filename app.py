@@ -75,7 +75,7 @@ class TestToken(MethodView):
 
 
 class CtList(MethodView):
-    # decorators = [jwt_token_requires]
+    decorators = [jwt_token_requires]
 
     def post(self):
         data = request.get_data()
@@ -221,7 +221,7 @@ class CtList(MethodView):
 
 
 class CtDetails(MethodView):
-    # decorators = [jwt_token_requires]
+    decorators = [jwt_token_requires]
 
     def post(self):
         data = request.get_data()
@@ -288,7 +288,7 @@ class CtDetails(MethodView):
 
 
 class UserDetailBaseCtTemp(MethodView):
-    # decorators = [jwt_token_requires]
+    decorators = [jwt_token_requires]
 
     def post(self):
         data = request.get_data()
@@ -390,7 +390,7 @@ class UserDetailBaseCtTemp(MethodView):
 
 # 首页搜索
 class IndexSearch(MethodView):
-    # decorators = [jwt_token_requires]
+    decorators = [jwt_token_requires]
 
     def post(self):
         data = request.get_data()
