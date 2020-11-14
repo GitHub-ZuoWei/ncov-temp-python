@@ -414,11 +414,11 @@ class IndexSearch(MethodView):
             else:
                 solr_query += '(person_name:' + key_words + ' || content:' + key_words + ')'
         if type:
+            if type == '化验单':
+                type = '报告单'
+            if type == '核酸检测':
+                type = '核酸扩增荧光定量检测报告单'
             if solr_query:
-                if type == '化验单':
-                    type = '报告单'
-                if type == '核酸检测':
-                    type = '核酸扩增荧光定量检测报告单'
                 solr_query += ' && (category:"' + '报告单' + type + '" || type:"' + type + '")'
             else:
                 solr_query += ' (category:"' + type + '" || type:"' + type + '")'
@@ -480,8 +480,9 @@ class IndexSearch(MethodView):
                 if index % 2 == 0:
                     if index == len(category_data) - 1:
                         break
-                    temp_person_data['name'] = category_data[index]
-                    temp_person_data['value'] = category_data[index + 1]
+                    if not category_data[index].isdigit():
+                        temp_person_data['name'] = category_data[index]
+                        temp_person_data['value'] = category_data[index + 1]
                 if temp_person_data:
                     content_data.append(temp_person_data)
 
@@ -515,6 +516,7 @@ class IndexSearch(MethodView):
             person_info_data_one.raw_response["response"]['size'] = size
             person_info_data_one.raw_response["response"]['sidebarType'] = type_data
             person_info_data_one.raw_response["response"]['sidebarKeywords'] = content_data
+            person_info_data_one.raw_response["response"]['sidebarPerson'] = person_data
             person_info_data_one.raw_response["response"]['docsTwo'] = person_info_data_two.raw_response["response"]["docs"]
             return return_response(person_info_data_one.raw_response["response"], 200)
 
