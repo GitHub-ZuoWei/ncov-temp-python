@@ -290,8 +290,92 @@ class UserDetailBaseCtTemp(MethodView):
             res_dict = {"retcode": 999999, "msg": "json format error:  " + str(e), "data": False}
             return Response(json.dumps(res_dict, ensure_ascii=False), status=500, content_type='application/json')
         name = json_data.get('name', None)
-        start_time = json_data.get('start_time', None)
-        dict = {}
+
+        if not name:
+            return Response(
+                json.dumps({"retcode": 999999, "msg": "缺少參數name", "data": False}, ensure_ascii=False),
+                status=500,
+                content_type="application/json")
+        db_sql = DBCreateSql()
+        person_sql = """
+                        SELECT * FROM person_info WHERE person_name = '{}'""".format(
+            name)
+        db_person_res = db_sql.find_all(person_sql)
+        db_person_res = db_person_res[0]
+        if not db_person_res:
+            return Response(
+                json.dumps({"retcode": 999999, "msg": "查無此人", "data": False}, ensure_ascii=False),
+                status=500,
+                content_type="application/json")
+
+        base_info = {
+            "name": name,
+            "sex": '男' if db_person_res[2] == '1' else '女',
+            "age": db_person_res[3],
+            "address": db_person_res[6],
+            "phone_number": db_person_res[7],
+            "hospitalized_number": db_person_res[8]
+        }
+
+        tmp_file_sql = """
+                                                                    SELECT person_name,file_path FROM file_record WHERE type = 2 AND person_name = '{}'
+                                                                    """.format(name)
+
+        db_tmp_file_res = db_sql.find_all(tmp_file_sql)
+
+        tmp_img_list = list()
+        for item in db_tmp_file_res:
+            v_list = item[1].split("/")
+            imgname = v_list[-1]
+            imgurl = item[1]
+            tmp_dict = {
+                "imgname": imgname,
+                "imgurl": 'static/' + imgurl
+            }
+
+            tmp_img_list.append(tmp_dict)
+
+        file_sql = """
+                                                        SELECT person_name,file_date,file_path FROM file_record WHERE type = 1 AND person_name = '{}'
+                                                        """.format(name)
+
+        db_file_res = db_sql.find_all(file_sql)
+        if not db_file_res:
+            res_dict = {"retcode": 200000, "msg": "success", "data": []}
+            return Response(json.dumps(res_dict, ensure_ascii=False), status=200, content_type='application/json')
+
+        res_list = []
+        time_dict = {}
+        for file in db_file_res:
+            if str(file[1]) in time_dict.keys():
+                time_dict[str(file[1])].append(file[2])
+            else:
+                time_dict[str(file[1])] = [file[2]]
+        total = len(time_dict.keys())
+        for k, v in time_dict.items():
+            abc = k.split(" ")
+            t = abc[0]
+            img_list = list()
+            for i in v:
+                v_list = i.split("/")
+                imgname = v_list[-1]
+                name = v_list[1]
+                imgurl = i
+                tmp_dict = {
+                    "imgname": imgname,
+                    "imgurl": 'static/' + imgurl
+                }
+                if len(img_list) > 3:
+                    break
+                img_list.append(tmp_dict)
+
+            dict = {
+                "start_time": t,
+                "img_list": img_list
+            }
+            res_list.append(dict)
+
+        dict = {"base_info": base_info, "tmp_img_list": tmp_img_list, "ct_img_list": res_list}
         res_dict = {"retcode": 200000, "msg": "success", "data": dict}
         return Response(json.dumps(res_dict, ensure_ascii=False), status=200, content_type='application/json')
 
