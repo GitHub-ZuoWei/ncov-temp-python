@@ -134,7 +134,7 @@ class CtList(MethodView):
                     time_dict[str(file[1])+'/'+file[0]] = [file[2]]
 
             slice_dicts = { k: time_dict[k] for k in list(time_dict.keys())[start:end]}
-            total = len(slice_dicts)
+            total = len(time_dict.keys())
             for k, v in slice_dicts.items():
                 k = k.split("/")[0]
                 k = k.split(" ")[0]
@@ -193,7 +193,7 @@ class CtList(MethodView):
                 else:
                     name_dict[file[0]] = [file[1]]
             slice_dicts = {k: name_dict[k] for k in list(name_dict.keys())[start:end]}
-            total = len(slice_dicts.keys())
+            total = len(name_dict.keys())
             for k, v in slice_dicts.items():
                 img_list = list()
                 for i in v:
@@ -309,12 +309,12 @@ class UserDetailBaseCtTemp(MethodView):
                         SELECT * FROM person_info WHERE person_name like '%{}%'""".format(
             name)
         db_person_res = db_sql.find_all(person_sql)
-        db_person_res = db_person_res[0]
         if not db_person_res:
             return Response(
-                json.dumps({"retcode": 999999, "msg": "查無此人", "data": False}, ensure_ascii=False),
-                status=500,
+                json.dumps({"retcode": 200000, "msg": "查無此人", "data": []}, ensure_ascii=False),
+                status=200,
                 content_type="application/json")
+        db_person_res = db_person_res[0]
 
         base_info = {
             "name": name,
