@@ -1,3 +1,5 @@
+import re
+
 from flask import Flask, request, Response
 from flask.views import MethodView
 from common.db.MysqlDB import DBCreateSql
@@ -305,7 +307,7 @@ class UserDetailBaseCtTemp(MethodView):
                 content_type="application/json")
         db_sql = DBCreateSql()
         person_sql = """
-                        SELECT * FROM person_info WHERE person_name = '{}'""".format(
+                        SELECT * FROM person_info WHERE person_name like '%{}%'""".format(
             name)
         db_person_res = db_sql.find_all(person_sql)
         db_person_res = db_person_res[0]
@@ -343,7 +345,7 @@ class UserDetailBaseCtTemp(MethodView):
             tmp_img_list.append(tmp_dict)
 
         file_sql = """
-                                                        SELECT person_name,file_date,file_path FROM file_record WHERE type = 1 AND person_name like %'{}'%
+                                                        SELECT person_name,file_date,file_path FROM file_record WHERE type = 1 AND person_name like '%{}%'
                                                         """.format(name)
 
         db_file_res = db_sql.find_all(file_sql)
@@ -424,7 +426,7 @@ class IndexSearch(MethodView):
             if type == '核酸检测':
                 type = '核酸扩增荧光定量检测报告单'
             if solr_query:
-                solr_query += ' && (category:"' + '报告单' + type + '" || type:"' + type + '")'
+                solr_query += ' && (category:"' + type + '" || type:"' + type + '")'
             else:
                 solr_query += ' (category:"' + type + '" || type:"' + type + '")'
         if start_time and end_time:
@@ -485,7 +487,7 @@ class IndexSearch(MethodView):
                 if index % 2 == 0:
                     if index == len(category_data) - 1:
                         break
-                    if not category_data[index].isdigit():
+                    if not category_data[index].isdigit() and not re.search("^[a-zA-z]+$", category_data[index]):
                         temp_person_data['name'] = category_data[index]
                         temp_person_data['value'] = category_data[index + 1]
                 if temp_person_data:
