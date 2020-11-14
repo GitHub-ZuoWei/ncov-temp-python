@@ -18,13 +18,13 @@ def jwt_token_requires(func):
             return Response(json.dumps(res_dict, ensure_ascii=False), status=500, content_type='application/json')
         token = json_data.get('token', None)
         if not token:
-            res_dict = {"retcode": 999999, "msg": "need token,please login to get", "data": False}
-            return Response(json.dumps(res_dict, ensure_ascii=False), status=500, content_type='application/json')
+            res_dict = {"retcode": 888888, "msg": "need token,please login to get", "data": False}
+            return Response(json.dumps(res_dict, ensure_ascii=False), status=200, content_type='application/json')
         jwt_utils = JwtUtils()
         is_jwt_token = jwt_utils.check(token)
         if is_jwt_token['status']:
             return func(*args, **kwargs)
         else:
-            res_dict = {"retcode": 999999, "msg": is_jwt_token['error'], "data": False}
-            return Response(json.dumps(res_dict, ensure_ascii=False), status=500, content_type='application/json')
+            res_dict = {"retcode": 888888, "msg": is_jwt_token['error'], "data": False}
+            return Response(json.dumps(res_dict, ensure_ascii=False), status=200, content_type='application/json')
     return wapper
